@@ -19,7 +19,7 @@ export default function NotAuthenticated() {
       <div className="auth-art">
         <span className="eyebrow">Wall Street Monday / INVEST</span>
         <h1>
-          Put your money
+          Put your investments
           <br />
           <em>in motion.</em>
         </h1>
