@@ -1,0 +1,223 @@
+.watchlist-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 43px 5.1vw 58px;
+  color: var(--ink);
+}
+.watchlist-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+.watchlist-heading h1 {
+  margin: 9px 0 5px;
+  font-size: 34px;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+.watchlist-subheading {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.watchlist-heading .button {
+  background: var(--ink);
+  color: #f9fbf2;
+}
+.watchlist-heading .button svg {
+  width: 14px;
+}
+.watchlist-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 13px;
+}
+.watchlist-overview > div {
+  display: flex;
+  min-height: 105px;
+  flex-direction: column;
+  gap: 7px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+.watchlist-overview span {
+  color: #7c8875;
+  font-size: 10px;
+  font-weight: 650;
+}
+.watchlist-overview strong {
+  font-size: 24px;
+  letter-spacing: -0.05em;
+}
+.watchlist-overview small {
+  color: #8b9586;
+  font-size: 9px;
+}
+.watchlist-panel-large {
+  margin-top: 13px;
+  padding: 22px 20px 0;
+}
+.watchlist-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.watchlist-toolbar h2 {
+  margin: 5px 0 0;
+  font-size: 19px;
+  letter-spacing: -0.04em;
+}
+.watchlist-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 230px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: #9ba298;
+}
+.watchlist-search svg {
+  width: 14px;
+}
+.watchlist-search input {
+  height: 30px;
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+}
+.watchlist-panel-large [data-slot="table-container"] {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.watchlist-panel-large th {
+  height: 42px;
+  background: #f5f7f1;
+  color: #8a9586;
+  font-size: 9px;
+}
+.watchlist-panel-large td {
+  height: 70px;
+  padding: 10px 12px;
+  font-size: 11px;
+}
+.watchlist-panel-large tr:hover {
+  background: #f4f6ed;
+}
+.watchlist-asset {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+.watchlist-asset:hover strong {
+  text-decoration: underline;
+}
+.watchlist-asset > span:last-child {
+  display: flex;
+  min-width: 145px;
+  flex-direction: column;
+  gap: 3px;
+}
+.watchlist-asset strong {
+  font-size: 12px;
+}
+.watchlist-asset small,
+.watchlist-subvalue {
+  color: var(--muted);
+  font-size: 9px;
+}
+.watchlist-logo {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  color: #af9b62;
+  background: #f2e4bf;
+}
+.watchlist-logo svg {
+  width: 14px;
+  fill: currentColor;
+}
+.watchlist-subvalue {
+  display: block;
+  margin-top: 4px;
+}
+.watchlist-sector {
+  color: #74806f;
+  font-size: 10px;
+}
+.watchlist-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 9px;
+  padding: 70px 20px;
+  color: #9aa298;
+  text-align: center;
+}
+.watchlist-empty svg {
+  width: 28px;
+  color: #c7cdbf;
+}
+.watchlist-empty strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+.watchlist-empty p {
+  margin: 0;
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .watchlist-page {
+    padding: 31px 20px 42px;
+  }
+  .watchlist-heading {
+    align-items: start;
+    gap: 18px;
+  }
+  .watchlist-heading .button {
+    flex: 0 0 auto;
+  }
+  .watchlist-overview {
+    grid-template-columns: 1fr;
+  }
+  .watchlist-overview > div {
+    min-height: 85px;
+  }
+  .watchlist-toolbar {
+    align-items: start;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .watchlist-search {
+    width: 100%;
+  }
+  .watchlist-panel-large {
+    overflow: hidden;
+  }
+  .watchlist-panel-large [data-slot="table-container"] {
+    margin: 0 -20px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+  .watchlist-panel-large th,
+  .watchlist-panel-large td {
+    padding: 10px;
+  }
+  .watchlist-panel-large th:nth-child(4),
+  .watchlist-panel-large td:nth-child(4),
+  .watchlist-panel-large th:nth-child(5),
+  .watchlist-panel-large td:nth-child(5) {
+    display: none;
+  }
+}

@@ -1,0 +1,15 @@
+.portfolio-assets [data-slot="table-container"] {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.portfolio-assets [data-slot="table-container"] table {
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .portfolio-assets [data-slot="table-container"] {
+    margin: 0 -20px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+}

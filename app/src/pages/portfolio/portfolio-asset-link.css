@@ -1,0 +1,12 @@
+.portfolio-asset-identity {
+  color: inherit;
+  text-decoration: none;
+}
+.portfolio-asset-identity:hover strong {
+  text-decoration: underline;
+}
+.portfolio-asset-identity:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid #9fb86d;
+  outline-offset: 4px;
+}

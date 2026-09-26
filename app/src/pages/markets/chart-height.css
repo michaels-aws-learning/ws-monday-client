@@ -1,0 +1,30 @@
+.detail-chart-panel {
+  height: 600px;
+}
+.detail-chart-panel .price-chart {
+  height: 500px;
+  min-height: 500px;
+}
+.chart-popup-surface {
+  min-height: 680px;
+}
+.chart-popup-surface .price-chart {
+  height: calc(100vh - 170px);
+  min-height: 560px;
+}
+@media (max-width: 760px) {
+  .detail-chart-panel {
+    height: 540px;
+  }
+  .detail-chart-panel .price-chart {
+    height: 420px;
+    min-height: 420px;
+  }
+  .chart-popup-surface {
+    min-height: 500px;
+  }
+  .chart-popup-surface .price-chart {
+    height: calc(100vh - 220px);
+    min-height: 400px;
+  }
+}
