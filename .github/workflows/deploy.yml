@@ -75,7 +75,6 @@ jobs:
 
     env:
       ENV_NAME: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
-      AWS_ACCOUNT_ID: ${{ github.ref == 'refs/heads/main' && secrets.PROD_AWS_ACCOUNT_ID || secrets.DEV_AWS_ACCOUNT_ID }}
       AWS_REGION: us-east-1
 
     steps:
@@ -88,6 +87,21 @@ jobs:
           role-to-assume: ${{ github.ref == 'refs/heads/main' && vars.PROD_AWS_ROLE_ARN || vars.DEV_AWS_ROLE_ARN }}
           role-session-name: github-deploy-${{ github.run_id }}
           aws-region: ${{ env.AWS_REGION }}
+
+      # Bootstrap is a one-time setup per account/region, done by you with your own
+      # login; the pipeline role isn't allowed to do it. This step only checks that
+      # it has been done, and fails fast with instructions if not.
+      - name: Verify CDK Bootstrap
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          if ! VERSION=$(aws ssm get-parameter \
+                --name /cdk-bootstrap/hnb659fds/version \
+                --query Parameter.Value --output text 2>/dev/null); then
+            echo "::error::CDK is not bootstrapped in $ACCOUNT/$AWS_REGION (or this role cannot read /cdk-bootstrap/hnb659fds/version)."
+            echo "::error::Run once with admin credentials: cdk bootstrap aws://$ACCOUNT/$AWS_REGION"
+            exit 1
+          fi
+          echo "CDK bootstrap found in $ACCOUNT/$AWS_REGION (version $VERSION)"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -109,13 +123,10 @@ jobs:
       - name: Install AWS CDK
         run: npm install -g aws-cdk
 
-      # Bootstrap is no longer run here. It's a one-time setup per account/region,
-      # done by you with your own login, and the pipeline role isn't allowed to do it.
-
+      # Account comes from the assumed role's credentials (CDK_DEFAULT_ACCOUNT).
       - name: Deploy Infrastructure with CDK
         run: |
           cd infra/
           cdk deploy --all \
             --require-approval never \
-            --context accountId=${{ env.AWS_ACCOUNT_ID }} \
             --context env=${{ env.ENV_NAME }}
