@@ -32,8 +32,8 @@ export default function NotAuthenticated() {
       </div>
       <section className="auth-panel">
         <div className="brand-mark">
-          <span>NS</span>
-          <strong>northstar</strong>
+          <span></span>
+          <strong></strong>
         </div>
         <div className="auth-copy">
           <span className="eyebrow">YOUR FINANCIAL HQ</span>
@@ -42,7 +42,7 @@ export default function NotAuthenticated() {
         </div>
         {error && <div className="error-message">{error.message}</div>}
         <Button className="auth-button" onClick={() => login()}>
-          Log in to Northstar <ChevronRight />
+          Log in to Wall Street Monday <ChevronRight />
         </Button>
         <Button className="auth-signup" variant="outline" onClick={signup}>
           Create an account
