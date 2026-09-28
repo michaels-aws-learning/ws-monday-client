@@ -87,7 +87,7 @@ jobs:
           role-to-assume: ${{ github.ref == 'refs/heads/main' && vars.AWS_PROD_ROLE_ARN || vars.AWS_DEV_ROLE_ARN }}
           role-session-name: github-deploy-${{ github.run_id }}
           aws-region: ${{ env.AWS_REGION }}
-          retry-max-attempts: 1
+          retry-max-attempts: 3
 
       # Bootstrap is a one-time setup per account/region, done by you with your own
       # login; the pipeline role isn't allowed to do it. This step only checks that
