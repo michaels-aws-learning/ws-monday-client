@@ -1,5 +1,5 @@
 .detail-chart-panel {
-  height: 600px;
+  height: 640px;
 }
 .detail-chart-panel .price-chart {
   height: 500px;
@@ -12,9 +12,24 @@
   height: calc(100vh - 170px);
   min-height: 560px;
 }
+.detail-chart-panel:fullscreen {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 22px 4vw;
+  background: var(--paper);
+  color: var(--ink);
+}
+.detail-chart-panel:fullscreen .price-chart {
+  height: calc(100vh - 220px);
+  min-height: 320px;
+}
 @media (max-width: 760px) {
   .detail-chart-panel {
-    height: 540px;
+    height: 580px;
   }
   .detail-chart-panel .price-chart {
     height: 420px;
@@ -26,5 +41,12 @@
   .chart-popup-surface .price-chart {
     height: calc(100vh - 220px);
     min-height: 400px;
+  }
+  .detail-chart-panel:fullscreen {
+    padding: 16px;
+  }
+  .detail-chart-panel:fullscreen .price-chart {
+    height: calc(100vh - 250px);
+    min-height: 240px;
   }
 }

@@ -12,10 +12,10 @@ export type MarketAsset = {
   peRatio: string;
   dividendYield: string;
   description: string;
-  chart: { time: string; open: number; high: number; low: number; close: number }[];
+  chart: { time: string; open: number; high: number; low: number; close: number; volume: number }[];
 };
 
-const chart = (values: number[]) =>
+const chart = (values: number[], averageVolume: number) =>
   values.map((close, index) => {
     const open = index === 0 ? close - 1 : values[index - 1];
     const range = Math.max(1.25, close * 0.012);
@@ -26,6 +26,10 @@ const chart = (values: number[]) =>
       high: Math.max(open, close) + range,
       low: Math.min(open, close) - range,
       close,
+      volume: Math.round(
+        averageVolume *
+          (0.68 + ((index * 7) % 9) * 0.08 + Math.abs(close - open) * 0.015),
+      ),
     };
   });
 
@@ -44,7 +48,7 @@ export const marketAssets: MarketAsset[] = [
     peRatio: "55.82",
     dividendYield: "0.03%",
     description: "NVIDIA designs accelerated computing platforms and chips used across gaming, data centers, and artificial intelligence.",
-    chart: chart([128, 130, 127, 132, 134, 131, 136, 135, 139, 137, 141, 140, 142]),
+    chart: chart([128, 130, 127, 132, 134, 131, 136, 135, 139, 137, 141, 140, 142], 14_000_000),
   },
   {
     symbol: "AAPL",
@@ -60,7 +64,7 @@ export const marketAssets: MarketAsset[] = [
     peRatio: "37.14",
     dividendYield: "0.42%",
     description: "Apple designs and sells consumer technology, software, and services through an integrated global ecosystem.",
-    chart: chart([218, 220, 219, 222, 221, 224, 223, 225, 224, 227, 226, 229, 228]),
+    chart: chart([218, 220, 219, 222, 221, 224, 223, 225, 224, 227, 226, 229, 228], 3_200_000),
   },
   {
     symbol: "MSFT",
@@ -76,7 +80,7 @@ export const marketAssets: MarketAsset[] = [
     peRatio: "35.61",
     dividendYield: "0.79%",
     description: "Microsoft develops productivity software, cloud infrastructure, operating systems, and enterprise services.",
-    chart: chart([400, 402, 398, 405, 407, 404, 410, 412, 409, 414, 413, 417, 416]),
+    chart: chart([400, 402, 398, 405, 407, 404, 410, 412, 409, 414, 413, 417, 416], 1_450_000),
   },
   {
     symbol: "TSLA",
@@ -92,7 +96,7 @@ export const marketAssets: MarketAsset[] = [
     peRatio: "92.47",
     dividendYield: "—",
     description: "Tesla designs electric vehicles, energy storage systems, and solar products supported by a direct sales model.",
-    chart: chart([351, 348, 352, 345, 347, 342, 344, 339, 343, 340, 342, 337, 339]),
+    chart: chart([351, 348, 352, 345, 347, 342, 344, 339, 343, 340, 342, 337, 339], 7_100_000),
   },
   {
     symbol: "AMZN",
@@ -108,7 +112,7 @@ export const marketAssets: MarketAsset[] = [
     peRatio: "48.31",
     dividendYield: "—",
     description: "Amazon operates online retail, cloud computing, digital streaming, and logistics businesses around the world.",
-    chart: chart([214, 216, 215, 219, 221, 220, 223, 222, 225, 224, 226, 228, 227]),
+    chart: chart([214, 216, 215, 219, 221, 220, 223, 222, 225, 224, 226, 228, 227], 2_700_000),
   },
 ];
 

@@ -7,16 +7,19 @@ export type ChartType = "candlestick" | "bar" | "line" | "area" | "baseline" | "
 export type ChartTimeRange = "1D" | "5D" | "1M" | "3M" | "6M" | "YTD" | "1Y" | "5Y" | "ALL";
 
 const chartTimeRanges: ChartTimeRange[] = ["1D", "5D", "1M", "3M", "6M", "YTD", "1Y", "5Y", "ALL"];
+const noComparisons: MarketAsset[] = [];
+export const comparisonColors = ["#2b72d6", "#c64f5b", "#c39232", "#45866a"];
 
 type PriceChartProps = {
   asset: MarketAsset;
+  comparisonAssets?: MarketAsset[];
   chartType?: ChartType;
   timeRange?: ChartTimeRange;
   drawingMode?: boolean;
   clearDrawingSignal?: number;
 };
 
-export const PriceChart = ({ asset, chartType = "candlestick", timeRange = "1M", drawingMode = false, clearDrawingSignal = 0 }: PriceChartProps) => {
+export const PriceChart = ({ asset, comparisonAssets = noComparisons, chartType = "candlestick", timeRange = "1M", drawingMode = false, clearDrawingSignal = 0 }: PriceChartProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);
@@ -45,9 +48,9 @@ export const PriceChart = ({ asset, chartType = "candlestick", timeRange = "1M",
 
     const closes = asset.chart.map(({ time, close }) => ({ time, value: close }));
     const baseline = asset.chart.reduce((total, candle) => total + candle.close, 0) / asset.chart.length;
-    const volumes = asset.chart.map(({ time, open, close }, index) => ({
+    const volumes = asset.chart.map(({ time, open, close, volume }) => ({
       time,
-      value: 80 + Math.abs(close - open) * 35 + index * 3,
+      value: volume,
       color: close >= open ? "rgba(94, 143, 97, .65)" : "rgba(182, 87, 90, .65)",
     }));
 
@@ -65,13 +68,44 @@ export const PriceChart = ({ asset, chartType = "candlestick", timeRange = "1M",
       series = chart.addSeries(BaselineSeries, { baseValue: { type: "price", price: baseline }, topLineColor: "#5e8f61", topFillColor1: "rgba(214, 244, 93, .35)", topFillColor2: "rgba(214, 244, 93, .05)", bottomLineColor: "#b6575a", bottomFillColor1: "rgba(182, 87, 90, .05)", bottomFillColor2: "rgba(182, 87, 90, .2)" });
       series.setData(closes as never);
     } else if (chartType === "histogram") {
-      series = chart.addSeries(HistogramSeries, { color: "rgba(94, 143, 97, .65)", priceFormat: { type: "volume" }, priceScaleId: "" });
-      series.setData(volumes as never);
-      chart.priceScale("").applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
+      series = chart.addSeries(LineSeries, { color: "#5e8f61", lineWidth: 2 });
+      series.setData(closes as never);
     } else {
       series = chart.addSeries(CandlestickSeries, { upColor: "#6f9b62", downColor: "#c77979", borderUpColor: "#5e8f61", borderDownColor: "#b6575a", wickUpColor: "#5e8f61", wickDownColor: "#b6575a" });
       series.setData(asset.chart as never);
     }
+
+    comparisonAssets.forEach((comparisonAsset, index) => {
+      if (comparisonAsset.symbol === asset.symbol || comparisonAsset.chart.length === 0) return;
+
+      const comparisonStart = comparisonAsset.chart[0].close;
+      const primaryStart = asset.chart[0]?.close;
+      if (!comparisonStart || !primaryStart) return;
+
+      const comparisonSeries = chart.addSeries(LineSeries, {
+        color: comparisonColors[index % comparisonColors.length],
+        lineWidth: 2,
+        title: comparisonAsset.symbol,
+        priceLineVisible: false,
+      });
+      comparisonSeries.setData(
+        comparisonAsset.chart.map(({ time, close }) => ({
+          time,
+          value: (close / comparisonStart) * primaryStart,
+        })) as never,
+      );
+    });
+
+    chart.addSeries(
+      HistogramSeries,
+      {
+        priceFormat: { type: "volume" },
+        priceLineVisible: false,
+        lastValueVisible: false,
+      },
+      1,
+    ).setData(volumes as never);
+    chart.panes()[1]?.setStretchFactor(0.22);
 
     chart.timeScale().fitContent();
     chartRef.current = chart;
@@ -83,7 +117,7 @@ export const PriceChart = ({ asset, chartType = "candlestick", timeRange = "1M",
       chart.remove();
       chartRef.current = null;
     };
-  }, [asset, chartType]);
+  }, [asset, comparisonAssets, chartType]);
 
   useEffect(() => {
     const chart = chartRef.current;
@@ -107,7 +141,7 @@ export const PriceChart = ({ asset, chartType = "candlestick", timeRange = "1M",
       from: Math.max(0, lastIndex - candleCount + 1),
       to: lastIndex,
     });
-  }, [asset, timeRange, chartType]);
+  }, [asset, comparisonAssets, timeRange, chartType]);
 
   useEffect(() => {
     const chart = chartRef.current;
@@ -115,7 +149,7 @@ export const PriceChart = ({ asset, chartType = "candlestick", timeRange = "1M",
     if (!chart || !series) return;
 
     const handleChartClick = (param: MouseEventParams<Time>) => {
-      if (!drawingMode || !param.point) return;
+      if (!drawingMode || !param.point || param.paneIndex !== 0) return;
 
       const price = series.coordinateToPrice(param.point.y);
       if (price === null) return;

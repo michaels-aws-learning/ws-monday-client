@@ -33,6 +33,57 @@
   align-items: center;
   gap: 5px;
 }
+.chart-compare-select select {
+  height: 28px;
+  max-width: 150px;
+  padding: 0 8px;
+  border: 1px solid #d4ddc5;
+  border-radius: 5px;
+  background: #fbfcf8;
+  color: #4f5f4a;
+  font: inherit;
+  font-size: 10px;
+}
+.chart-comparison-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: -4px 0 10px;
+}
+.chart-comparison-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 25px;
+  padding: 2px 5px 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 700;
+}
+.chart-comparison-swatch {
+  width: 13px;
+  height: 3px;
+}
+.chart-comparison-item button {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.chart-comparison-item button:hover {
+  color: var(--ink);
+}
+.chart-comparison-item button svg {
+  width: 12px;
+  height: 12px;
+}
 .chart-tool {
   color: #66705f;
 }
@@ -44,18 +95,18 @@
   width: 13px;
 }
 .trade-buy {
-  color: #25351f;
-  background: #d6f45d;
+  color: #fff;
+  background: #2864d7;
 }
 .trade-buy:hover {
-  background: #c5e44a;
+  background: #1f54bd;
 }
 .trade-sell {
   color: #fff;
-  background: #b6575a;
+  background: #c43f4c;
 }
 .trade-sell:hover {
-  background: #a74c50;
+  background: #a8323e;
 }
 .chart-hint {
   margin: -3px 0 11px;
@@ -110,6 +161,112 @@
 }
 .trade-ticket-fields .button {
   height: 32px;
+}
+.trade-status {
+  margin: 13px 0;
+  padding: 11px 14px;
+  border-left: 3px solid #2864d7;
+  background: #edf3ff;
+  color: #244477;
+  font-size: 12px;
+}
+.trade-confirmation {
+  width: min(440px, 100vw);
+  max-width: min(440px, 100vw);
+  gap: 0;
+  padding: 28px;
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+.trade-confirmation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 23px;
+  border-bottom: 1px solid var(--line);
+}
+.trade-confirmation-title {
+  margin: 6px 0;
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+.trade-order-form {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+.trade-sheet-fields {
+  display: grid;
+  align-items: stretch;
+  gap: 15px;
+  margin: 22px 0;
+}
+.trade-sheet-fields input,
+.trade-sheet-fields select {
+  width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+}
+.trade-confirmation-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0;
+  font-size: 13px;
+}
+.trade-confirmation-side svg {
+  width: 17px;
+  height: 17px;
+}
+.trade-confirmation-side.buy {
+  color: #2864d7;
+}
+.trade-confirmation-side.sell {
+  color: #c43f4c;
+}
+.trade-confirmation-side strong {
+  color: var(--ink);
+}
+.trade-confirmation-details {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+}
+.trade-confirmation-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+}
+.trade-confirmation-details dt {
+  color: var(--muted);
+}
+.trade-confirmation-details dd {
+  margin: 0;
+  text-align: right;
+}
+.trade-confirmation-details .trade-confirmation-total {
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  font-weight: 750;
+}
+.trade-demo-notice {
+  margin: 22px 0;
+  padding: 11px 12px;
+  background: #f2f5e9;
+  color: #66705f;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.trade-confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
 }
 .chart-popup-page {
   display: flex;

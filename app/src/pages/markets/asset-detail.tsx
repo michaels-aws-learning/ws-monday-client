@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   Maximize2,
+  Minimize2,
   PencilRuler,
   Plus,
   Search,
@@ -11,7 +12,7 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../../components/ui/button";
@@ -25,12 +26,19 @@ import {
 import {
   ChartTimeRangeControls,
   PriceChart,
+  comparisonColors,
   type ChartTimeRange,
   type ChartType,
 } from "../../components/markets/price-chart";
+import {
+  BuySellModal,
+  type TradeOrder,
+  type TradeOrderType,
+  type TradeSide,
+} from "../../components/trading/buy-sell-modal";
 import { PreviousNav } from "../../components/previous/previous-nav";
 import NotAuthenticated from "../no-auth/not-authenticated";
-import { findAsset, marketAssets } from "./market-data";
+import { findAsset, marketAssets, type MarketAsset } from "./market-data";
 import "./markets.css";
 import "./chart-features.css";
 import "./chart-type-picker.css";
@@ -51,21 +59,40 @@ const chartTypes: { value: ChartType; label: string }[] = [
   { value: "line", label: "Line" },
   { value: "area", label: "Area" },
   { value: "baseline", label: "Baseline" },
-  { value: "histogram", label: "Volume" },
+  { value: "histogram", label: "Line + volume" },
 ];
 
 export default function AssetDetail() {
   const { symbol = "NVDA" } = useParams();
   const { isLoading, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
+  const chartPanelRef = useRef<HTMLElement>(null);
   const [search, setSearch] = useState("");
   const [drawingMode, setDrawingMode] = useState(false);
   const [clearDrawingSignal, setClearDrawingSignal] = useState(0);
-  const [tradeSide, setTradeSide] = useState<"buy" | "sell" | null>(null);
+  const [tradeSide, setTradeSide] = useState<TradeSide | null>(null);
+  const [quantity, setQuantity] = useState("1");
+  const [orderType, setOrderType] = useState<TradeOrderType>("market");
+  const [limitPrice, setLimitPrice] = useState("");
+  const [orderSheetOpen, setOrderSheetOpen] = useState(false);
+  const [tradeNotice, setTradeNotice] = useState("");
+  const [isChartFullscreen, setIsChartFullscreen] = useState(false);
+  const [fullscreenError, setFullscreenError] = useState("");
   const [chartType, setChartType] = useState<ChartType>("candlestick");
   const [timeRange, setTimeRange] = useState<ChartTimeRange>("1M");
+  const [comparisonAssets, setComparisonAssets] = useState<MarketAsset[]>([]);
   const asset = findAsset(symbol);
   const ChangeIcon = asset?.positive ? ArrowUpRight : ArrowDownRight;
+
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      setIsChartFullscreen(document.fullscreenElement === chartPanelRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+    return () =>
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
+  }, []);
 
   if (isLoading)
     return <div className="auth-loading">Loading your workspace...</div>;
@@ -83,11 +110,51 @@ export default function AssetDetail() {
     }
   };
 
-  const openChartWindow = () => {
-    window.open(
-      `/markets/${asset.symbol}/chart?type=${chartType}`,
-      `${asset.symbol}-chart`,
-      "popup,width=1200,height=760,resizable=yes,scrollbars=yes",
+  const toggleChartFullscreen = async () => {
+    const chartPanel = chartPanelRef.current;
+    if (!chartPanel) return;
+
+    try {
+      if (document.fullscreenElement === chartPanel) {
+        await document.exitFullscreen();
+      } else {
+        await chartPanel.requestFullscreen();
+      }
+      setFullscreenError("");
+    } catch {
+      setFullscreenError("Fullscreen is unavailable in this browser.");
+    }
+  };
+
+  const openTradeTicket = (side: TradeSide) => {
+    setTradeSide(side);
+    setQuantity("1");
+    setOrderType("market");
+    setLimitPrice("");
+    setTradeNotice("");
+    setOrderSheetOpen(true);
+  };
+
+  const handleTradeConfirmation = (order: TradeOrder) => {
+    setTradeSide(null);
+    setTradeNotice(
+      `Demo ${order.side} order for ${order.quantity} ${order.symbol} confirmed. No live order was sent.`,
+    );
+  };
+
+  const activeComparisonAssets = comparisonAssets.filter(
+    (comparisonAsset) => comparisonAsset.symbol !== asset.symbol,
+  );
+
+  const addComparisonAsset = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const comparisonAsset = findAsset(event.target.value);
+    event.target.value = "";
+    if (!comparisonAsset || comparisonAsset.symbol === asset.symbol) return;
+
+    setComparisonAssets((current) =>
+      current.some((item) => item.symbol === comparisonAsset.symbol)
+        ? current
+        : [...current, comparisonAsset],
     );
   };
 
@@ -114,7 +181,7 @@ export default function AssetDetail() {
           >
             <Star />
           </Button>
-          <Button>
+          <Button onClick={() => openTradeTicket("buy")}>
             <Plus /> Trade {asset.symbol}
           </Button>
         </div>
@@ -149,7 +216,7 @@ export default function AssetDetail() {
           </Button>
         </div>
       </section>
-      <section className="detail-chart-panel">
+      <section className="detail-chart-panel" ref={chartPanelRef}>
         <div className="chart-toolbar">
           <form className="chart-asset-search" onSubmit={handleAssetSearch}>
             <Search />
@@ -182,17 +249,37 @@ export default function AssetDetail() {
                 ))}
               </SelectContent>
             </Select>
+            <label className="chart-compare-select">
+              <span className="sr-only">Compare with another asset</span>
+              <select value="" onChange={addComparisonAsset}>
+                <option value="">Compare asset</option>
+                {marketAssets.map((comparisonAsset) => (
+                  <option
+                    key={comparisonAsset.symbol}
+                    value={comparisonAsset.symbol}
+                    disabled={
+                      comparisonAsset.symbol === asset.symbol ||
+                      activeComparisonAssets.some(
+                        (item) => item.symbol === comparisonAsset.symbol,
+                      )
+                    }
+                  >
+                    {comparisonAsset.symbol} · {comparisonAsset.name}
+                  </option>
+                ))}
+              </select>
+            </label>
             <Button
               className="trade-buy"
               size="xs"
-              onClick={() => setTradeSide("buy")}
+              onClick={() => openTradeTicket("buy")}
             >
               <Plus /> Buy
             </Button>
             <Button
               className="trade-sell"
               size="xs"
-              onClick={() => setTradeSide("sell")}
+              onClick={() => openTradeTicket("sell")}
             >
               Sell
             </Button>
@@ -216,12 +303,53 @@ export default function AssetDetail() {
               className="chart-tool"
               variant="ghost"
               size="xs"
-              onClick={openChartWindow}
+              onClick={() => void toggleChartFullscreen()}
+              aria-label={isChartFullscreen ? "Exit chart fullscreen" : "View chart fullscreen"}
+              aria-pressed={isChartFullscreen}
+              title={isChartFullscreen ? "Exit fullscreen" : "Fullscreen"}
             >
-              <Maximize2 /> Pop out
+              {isChartFullscreen ? <Minimize2 /> : <Maximize2 />}
+              {isChartFullscreen ? "Exit fullscreen" : "Fullscreen"}
             </Button>
           </div>
         </div>
+        {fullscreenError && (
+          <p className="chart-hint" role="status">
+            {fullscreenError}
+          </p>
+        )}
+        {activeComparisonAssets.length > 0 && (
+          <div className="chart-comparison-legend" aria-label="Compared assets">
+            {activeComparisonAssets.map((comparisonAsset) => {
+              const colorIndex = comparisonAssets.findIndex(
+                (item) => item.symbol === comparisonAsset.symbol,
+              );
+              const color = comparisonColors[colorIndex % comparisonColors.length];
+
+              return (
+                <span className="chart-comparison-item" key={comparisonAsset.symbol}>
+                  <span
+                    className="chart-comparison-swatch"
+                    style={{ backgroundColor: color }}
+                    aria-hidden="true"
+                  />
+                  {comparisonAsset.symbol}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${comparisonAsset.symbol} comparison`}
+                    onClick={() =>
+                      setComparisonAssets((current) =>
+                        current.filter((item) => item.symbol !== comparisonAsset.symbol),
+                      )
+                    }
+                  >
+                    <X />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        )}
         {drawingMode && (
           <p className="chart-hint">
             Click the chart to place a horizontal price level.
@@ -229,6 +357,7 @@ export default function AssetDetail() {
         )}
         <PriceChart
           asset={asset}
+          comparisonAssets={comparisonAssets}
           chartType={chartType}
           timeRange={timeRange}
           drawingMode={drawingMode}
@@ -236,41 +365,28 @@ export default function AssetDetail() {
         />
         <ChartTimeRangeControls value={timeRange} onChange={setTimeRange} />
       </section>
+      {tradeNotice && (
+        <p className="trade-status" role="status">
+          {tradeNotice}
+        </p>
+      )}
       {tradeSide && (
-        <section className="trade-ticket">
-          <div>
-            <p className="eyebrow">Quick order</p>
-            <h2>
-              {tradeSide === "buy" ? "Buy" : "Sell"} {asset.symbol}
-            </h2>
-          </div>
-          <div className="trade-ticket-fields">
-            <label>
-              Shares
-              <input defaultValue="1" type="number" min="0.01" step="0.01" />
-            </label>
-            <label>
-              Order type
-              <select defaultValue="market">
-                <option value="market">Market order</option>
-                <option value="limit">Limit order</option>
-              </select>
-            </label>
-            <Button
-              className={tradeSide === "buy" ? "trade-buy" : "trade-sell"}
-            >
-              {tradeSide === "buy" ? "Review buy order" : "Review sell order"}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label="Close order ticket"
-              onClick={() => setTradeSide(null)}
-            >
-              <X />
-            </Button>
-          </div>
-        </section>
+        <BuySellModal
+          open={orderSheetOpen}
+          onOpenChange={(open) => {
+            setOrderSheetOpen(open);
+            if (!open) setTradeSide(null);
+          }}
+          asset={asset}
+          side={tradeSide}
+          quantity={quantity}
+          onQuantityChange={setQuantity}
+          orderType={orderType}
+          onOrderTypeChange={setOrderType}
+          limitPrice={limitPrice}
+          onLimitPriceChange={setLimitPrice}
+          onConfirm={handleTradeConfirmation}
+        />
       )}
       <div className="asset-detail-grid">
         <section className="detail-panel">
