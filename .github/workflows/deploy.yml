@@ -39,22 +39,11 @@ jobs:
         working-directory: app
         env: 
           NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
-          VITE_AUTH0_DOMAIN: ${{ github.ref == 'refs/heads/main' && 'authenticate.mallient.com' || 'authenticate-dev.mallient.com' }}
-          VITE_AUTH0_CLIENT_ID: ${{ github.ref == 'refs/heads/main' && 'TVUO5krYwYfQn0IuN2Lu7TckYOmzlygY' || '4ZOOXkehfkAM97g3xGT1sYXQw5WRrqq9' }}
-          VITE_CARTOMAIL_CLOUDFRONT_URL: ${{ github.ref == 'refs/heads/main' && 'd2s4foqx0d4pwl.cloudfront.net/' || 'https://dnmmf3ubeuub9.cloudfront.net/' }}
-          VITE_BASE_PATH: ${{ github.ref == 'refs/heads/main' && 'https://app.mallient.com' || 'http://app-dev.mallient.com' }}
-          VITE_API_BASE_URL: ${{ github.ref == 'refs/heads/main' && 'https://api-live.mallient.com' || 'https://api-dev.mallient.com' }}
-          VITE_AUDIENCE: ${{ github.ref == 'refs/heads/main' && 'https://api-live.mallient.com' || 'https://api-dev.mallient.com' }}
-          VITE_AUTH0_CALLBACK_URL: ${{ github.ref == 'refs/heads/main' && 'https://app.mallient.com/callback' || 'http://app-dev.mallient.com/callback' }}
-          VITE_NOTIFICATIONS_WS_URL: ${{ github.ref == 'refs/heads/main' && 'wss://notifications.mallient.com' || 'wss://wfxrp8nyvh.execute-api.us-east-1.amazonaws.com/dev' }}
+          VITE_AUTH0_DOMAIN: ${{ github.ref == 'refs/heads/main' && vars.VITE_AUTH0_PROD_DOMAIN || vars.VITE_AUTH0_DEV_DOMAIN }}
+          VITE_AUTH0_CLIENT_ID: ${{ github.ref == 'refs/heads/main' && vars.VITE_AUTH0_PROD_CLIENT_ID || vars.VITE_AUTH0_DEV_CLIENT_ID }}
+        
         run: |
           npm ci
-          echo "VITE_AUTH0_DOMAIN=$VITE_AUTH0_DOMAIN"
-          echo "VITE_AUTH0_CLIENT_ID=$VITE_AUTH0_CLIENT_ID"
-          echo "VITE_CARTOMAIL_CLOUDFRONT_URL=$VITE_CARTOMAIL_CLOUDFRONT_URL"
-          echo "VITE_API_BASE_URL=$VITE_API_BASE_URL"
-          echo "VITE_AUTH0_CALLBACK_URL=$VITE_AUTH0_CALLBACK_URL"
-          echo "VITE_BASE_PATH=$VITE_BASE_PATH"
           npm install
           npm run build:${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
 

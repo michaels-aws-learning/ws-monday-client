@@ -5,7 +5,7 @@ export const TopNav = () => {
     return (
         <header className="topbar">
             <div className="mobile-brand">
-                <div className="brand-mark"><span>NS</span><strong>northstar</strong></div>
+                <div className="brand-mark"><span>WSM</span><strong>Wall Street Monday</strong></div>
             </div>
             <Button className="search-bar">
                 <Search /><span>Search markets, stocks, ETFs...</span>
